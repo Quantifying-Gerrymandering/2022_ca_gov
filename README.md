@@ -1,1 +1,15 @@
 # 2022_ca_gov
+
+This repository contains data for the 2022 general elections in California by precinct and conversion from precincts to census blocks from California's [Statewide Database](https://statewidedatabase.org/), and Python code that uses the precinct data and block conversions to convert precinct-level gubernatorial election results to block-level, and block-level results to block-group-level results.
+
+* "Precinct Results.csv" includes election results for various races in California's 2022 general elections. The analysis in this repository focuses specifically on the gubernatorial election, whose votes are labeled "GOVDEM01" for Gavin Newsom (D), and "GOVREP01" for Brian Dahle (R).
+* "Conversion.csv" includes conversions between precincts and census blocks. The conversion file shows which blocks are in each precinct, and lists the number of registered voters in each block, precinct and precinct-block sector. Some census blocks straddle multiple precincts.
+* "convert.py" converts precinct-level data to block-level data. Votes from a precinct are allocated to blocks based on the share of the precinct's registered voters that reside in each block. The [Hamilton method](https://en.wikipedia.org/wiki/Hare_quota) is used to allocate the remaining votes.
+  * Example: Imagine that precinct P has 1,003 votes. P contains 5 blocks: P1, P2, P3, P4, and P5. These blocks do not extend into any other precinct. They contain 33, 14, 12, 26, and 15 percent of P's registered voters, respectively.
+  * Proportional allocation would allocate 330.99 votes to P1, 140.42 votes to P2, 120.36 votes to P3, 260.78 votes to P4, and 150.45 votes to P5.
+  * The values are rounded down: 330, 140, 120, 260, 150. The fractional parts or remainders are 0.99, 0.42, 0.36, 0.78, and 0.45, which sum to 3, thus there are 3 remaining votes. We allocate these votes to the 3 blocks with the largest remainder (0.99, 0.78, and 0.45).
+  * The final estimated vote counts for each block are 331, 140, 120, 261, and 151.
+  * The use of the Hamilton method ensures that no vote is eliminated, so the total number of votes in the "Block Results.csv" file is the same as that of the "Precinct Results.csv" file. There are still a few hundred votes lost, however, because some precincts have not been assigned to blocks.
+* "Block Results.csv" contains estimated results of the 2022 gubernatorial election by census block. This file is the output of the "convert.py" file. This file is in a form that can be uploaded to a custom election dataset in [Dave's Redistricting](https://davesredistricting.org/) - the column "Tot" denotes the total number of votes, "D" denotes the number of Democratic votes, and "R" denotes the number of Republican votes.
+* "cb_to_cbg.csv" converts block-level results to block-group-level results. Census blocks have 15-digit identifiers, of which the first 12 digits denote the block group that contains the block.
+* "Block Group Results.csv" contains estimated results of the 2022 gubernatorial election by census block group. Like "Block Results.csv", it is in a form compatible with Dave's Redistricting.
